@@ -47,11 +47,18 @@ data.2018 <- data.2018[which(ind.na.2018 < 0.1),]
 setdiff(unique(rownames(data.2015)), unique(rownames(data.2017)))
 setdiff(unique(rownames(data.2016)), unique(rownames(data.2017)))
 setdiff(unique(rownames(data.2017)), unique(rownames(data.2018)))
-## Add growth variables TODO:
+## Add growth variables 2016:
 data.2017$Growth.2016 <- NA
-data.2017$Growth.2015 <- NA
-#data.2017[rownames(data.2016)[1], 28] <-  data.2017[rownames(data.2016)[1], 3] - data.2016[rownames(data.2016)[1], 3] 
+growth16 <- as.data.frame(data.2017$Life.Ladder - data.2016[rownames(data.2017),], row.names = rownames(data.2017))
+data.2017[,"Growth.2016"] <- merge(data.2017, growth16, by="row.names", all.x=TRUE)[,18]
 
+## Add growth variables 2015:
+data.2017$Growth.2015 <- NA
+growth15 <- as.data.frame(data.2016 - data.2015[rownames(data.2016),], row.names = rownames(data.2016))
+data.2017[,"Growth.2015"] <- merge(data.2017, growth15, by="row.names", all.x=TRUE)[,19]
+
+# remove redundant dataframes
+rm(growth15, growth16)
 
 ########## OUTLIER DETECTION AND HANDLING ##########
 
