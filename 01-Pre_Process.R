@@ -2,8 +2,10 @@ par(mfrow=c(1,1))
 rm(list=ls())
 set.seed(42)
 
-library(chemometrics)
 library(DMwR)
+library(chemometrics)
+library(mice) 
+library(missForest) 
 
 ##########  READ DATA AND SPLIT IT ##########
 table <- read.delim("whr2019.csv", header = TRUE, sep = ";", dec = ".")
@@ -62,11 +64,16 @@ data.2017[,"Growth.2015"] <- merge(data.2017, growth15, by="row.names", all.x=TR
 rm(growth15, growth16)
 
 
-########## IMPUTATION OF MISSING VAUES ##########
+########## IMPUTATION OF MISSING VAUES ########## 
+  
+m = mice(data.2017, m = 1, print = FALSE, seed = 1)
+names <- rownames(data.2017)
+data.2017 = complete(m)
+rownames(data.2017) <- names
 
 
 ########## OUTLIER DETECTION AND HANDLING ##########
-numeric <- data.2018[,-1]
+numeric <- data.2017[,-1]
 
 ### Univariate outliers discussion
 for( i in 1:ncol(numeric)) {
@@ -75,24 +82,6 @@ for( i in 1:ncol(numeric)) {
   readline(prompt="Press [enter] to continue")
 }
 
-<<<<<<< HEAD
-########## IMPUTATION OF MISSING VAUES ##########
-# Imputation types:
-#   * 1 - mice
-#   * 2 - knn ** not checked
-#   * 3 - random forest
-#################################################  
-typeImp = 1 
-  
-#if (typeImp ==1) { #mice
-  library(mice) 
-  m = mice(data.2017, m = 1, print = FALSE, seed = 1)
-  #complete(m)[!complete.cases(data.2017),]
-  #data.2017 = complete(m) ;
-  mImp = complete(m) ;
-  rownames(mImp) = rownames(data.2017);
-  #}
-=======
 ### Multivariate outliers discussion
 
 ## Mahalanobis distance outlier detection
@@ -104,30 +93,6 @@ outliers.mout <- numeric[which(mout.dist$md > mout.dist$cutoff & mout.dist$rd  >
 ## Density factor outlier detection
 out.scores <- lofactor(numeric, k=5)
 plot(out.scores)
-abline(h=1.5, col="red")
-outliers.lof <- numeric[which(out.scores > 1.5),]
->>>>>>> cf4f15f1518c4abf70b3a56389df5ad3294891ec
-
-#if (typeImp ==2) { #knn
-  library(DMwR) # knn imputation
-  #data.2017 = knnImputation(data.2017, k = 1, scale = T)
-  knnImp = knnImputation(data.2017, k = 1, scale = T)
-  #}
-
-#if (typeImp ==3) { # forest imputation
-  library(missForest) 
-  rf = missForest(data.2017)
-  # data.2017 = rf$ximp;
-  rfImp= rf$ximp;
-#}
-
-
-mImp$type = "mice";
-rfImp$type = "random forest";
-knnImp$type = "knn";
-mImp$country = rownames(data.2017);
-rfImp$country = rownames(data.2017);
-knnImp$country = rownames(data.2017);
-newdf <- rbind(mImp[!complete.cases(data.2017),], rfImp[!complete.cases(data.2017),])
-newdf <- rbind(newdf, knnImp[!complete.cases(data.2017),])
+abline(h=1.4, col="red")
+outliers.lof <- numeric[which(out.scores > 1.4),]
 
