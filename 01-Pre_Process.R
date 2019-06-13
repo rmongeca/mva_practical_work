@@ -2,6 +2,8 @@ par(mfrow=c(1,1))
 rm(list=ls())
 set.seed(42)
 
+library(chemometrics)
+library(DMwR)
 
 ##########  READ DATA AND SPLIT IT ##########
 table <- read.delim("whr2019.csv", header = TRUE, sep = ";", dec = ".")
@@ -44,7 +46,7 @@ data.2018 <- data.2018[which(ind.na.2018 < 0.1),]
 
 ##########  ADD GROWTH VARIABLES FOR PREVIOUS 2016, 2015 YEARS  ##########
 ## See country differences between years
-setdiff(unique(rownames(data.2015)), unique(rownames(data.2017)))
+setdiff(unique(rownames(data.2015)), unique(rownames(data.2016)))
 setdiff(unique(rownames(data.2016)), unique(rownames(data.2017)))
 setdiff(unique(rownames(data.2017)), unique(rownames(data.2018)))
 ## Add growth variables 2016:
@@ -57,12 +59,34 @@ data.2017$Growth.2015 <- NA
 growth15 <- as.data.frame(data.2016 - data.2015[rownames(data.2016),], row.names = rownames(data.2016))
 data.2017[,"Growth.2015"] <- merge(data.2017, growth15, by="row.names", all.x=TRUE)[,19]
 
-# remove redundant dataframes
 rm(growth15, growth16)
-
-########## OUTLIER DETECTION AND HANDLING ##########
 
 
 ########## IMPUTATION OF MISSING VAUES ##########
+
+
+########## OUTLIER DETECTION AND HANDLING ##########
+numeric <- data.2018[,-1]
+
+### Univariate outliers discussion
+for( i in 1:ncol(numeric)) {
+  title <- paste("Histogram of", colnames(numeric)[i])
+  hist(numeric[,i], main=title)
+  readline(prompt="Press [enter] to continue")
+}
+
+### Multivariate outliers discussion
+
+## Mahalanobis distance outlier detection
+mout.dist <- Moutlier(numeric, plot = F)
+plot(rd ~ md, mout.dist)
+abline(h=mout.dist$cutoff, v=mout.dist$cutoff, col="red")
+outliers.mout <- numeric[which(mout.dist$md > mout.dist$cutoff & mout.dist$rd  > mout.dist$cutoff),]
+
+## Density factor outlier detection
+out.scores <- lofactor(numeric, k=5)
+plot(out.scores)
+abline(h=1.5, col="red")
+outliers.lof <- numeric[which(out.scores > 1.5),]
 
 
