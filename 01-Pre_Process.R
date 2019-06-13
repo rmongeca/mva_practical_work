@@ -57,5 +57,39 @@ data.2017$Growth.2015 <- NA
 
 
 ########## IMPUTATION OF MISSING VAUES ##########
+# Imputation types:
+#   * 1 - mice
+#   * 2 - knn ** not checked
+#   * 3 - random forest
+#################################################  
+typeImp = 1 
+  
+if (typeImp ==1) { #mice
+  library(mice) 
+  m = mice(data.2017, m = 1, print = FALSE, seed = 1)
+  #complete(m)[!complete.cases(data.2017),]
+  #data.2017 = complete(m) ;
+  mImp = complete(m) ;
+}
+
+if (typeImp ==2) { #knn
+  library(DMwR) # knn imputation
+  #data.2017 = knnImputation(data.2017, k = 1, scale = T)
+  knnImp = knnImputation(data.2017, k = 1, scale = T)
+}
+
+if (typeImp ==3) { # forest imputation
+  library(missForest) 
+  rf = missForest(data.2017)
+  # data.2017 = rf$ximp;
+  rfImp= rf$ximp;
+}
+
+
+mImp$type = "mice";
+mImp[!complete.cases(data.2017),]
+newdf <- rbind(df, de)
+
+
 
 
