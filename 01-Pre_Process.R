@@ -22,12 +22,16 @@ summary(table)
 ## Check variable missings
 (var.na <- apply(table, 2, function(x) 100*(sum(is.na(x))/nrow(table))))
 ## Drop variables lots of missing
+dropped.columns <- colnames(table)[c(14:15, 18, 21:27)]
 table <- table[,- c(14:15, 18, 21:27)]
 ## Check individuals missings
 (ind.na <- apply(table, 1, function(x) 100*(sum(is.na(x)))/ncol(table)))
 ## Not many missings per individual
+## we remove the individuals that have more than 25% missing values
+dropped.rows <- table[which(ind.na >= 25),]
+table <- table[which(ind.na < 25),]
 
-##########  SPLIT YEARS AND ADD VARIABLES ##########
+##########  SPLIT YEARS AND ADD COUNTRY NAMES AS ROW NAMES  ##########
 ## Split yearly data
 data.2017 <- table[which(table$Year == 2017),]
 data.2018 <- table[which(table$Year == 2018),]
@@ -35,6 +39,10 @@ rownames(data.2017) <- data.2017$Country.name
 rownames(data.2018) <- data.2018$Country.name
 data.2017 <- data.2017[,-c(1,3)]
 data.2018 <- data.2018[,-c(1,3)]
+(ind.na.2018 <- apply(data.2018, 1, function(x) 100*(sum(is.na(x)))/ncol(table)))
+data.2018 <- data.2018[which(ind.na.2018 < 0.1),]
+
+##########  ADD GROWTH VARIABLES FOR PREVIOUS 2016, 2015 YEARS  ##########
 ## See country differences between years
 setdiff(unique(rownames(data.2015)), unique(rownames(data.2017)))
 setdiff(unique(rownames(data.2016)), unique(rownames(data.2017)))
@@ -43,7 +51,6 @@ setdiff(unique(rownames(data.2017)), unique(rownames(data.2018)))
 data.2017$Growth.2016 <- NA
 data.2017$Growth.2015 <- NA
 #data.2017[rownames(data.2016)[1], 28] <-  data.2017[rownames(data.2016)[1], 3] - data.2016[rownames(data.2016)[1], 3] 
-## Add region variable TODO:
 
 
 ########## OUTLIER DETECTION AND HANDLING ##########
