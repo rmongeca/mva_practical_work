@@ -71,32 +71,35 @@ rm(growth15, growth16)
 #################################################  
 typeImp = 1 
   
-if (typeImp ==1) { #mice
+#if (typeImp ==1) { #mice
   library(mice) 
   m = mice(data.2017, m = 1, print = FALSE, seed = 1)
   #complete(m)[!complete.cases(data.2017),]
   #data.2017 = complete(m) ;
   mImp = complete(m) ;
-}
+  rownames(mImp) = rownames(data.2017);
+  #}
 
-if (typeImp ==2) { #knn
+#if (typeImp ==2) { #knn
   library(DMwR) # knn imputation
   #data.2017 = knnImputation(data.2017, k = 1, scale = T)
   knnImp = knnImputation(data.2017, k = 1, scale = T)
-}
+  #}
 
-if (typeImp ==3) { # forest imputation
+#if (typeImp ==3) { # forest imputation
   library(missForest) 
   rf = missForest(data.2017)
   # data.2017 = rf$ximp;
   rfImp= rf$ximp;
-}
+#}
 
 
 mImp$type = "mice";
-mImp[!complete.cases(data.2017),]
-newdf <- rbind(df, de)
-
-
-
+rfImp$type = "random forest";
+knnImp$type = "knn";
+mImp$country = rownames(data.2017);
+rfImp$country = rownames(data.2017);
+knnImp$country = rownames(data.2017);
+newdf <- rbind(mImp[!complete.cases(data.2017),], rfImp[!complete.cases(data.2017),])
+newdf <- rbind(newdf, knnImp[!complete.cases(data.2017),])
 
