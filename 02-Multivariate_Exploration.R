@@ -122,6 +122,12 @@ clusterData <- function(data, distance.method="euclidean",
     
 }
 
+plotAddSubtitle <- function(subtitle) {
+  par(adj = 1)    # Align subtitle to the right
+  title(sub = subtitle, cex.sub=1.1)
+  par(adj = 0.5)  # Reset alignment
+}
+
 method <- "Ward"
 subtitle <- paste("Aggregation method:", method)
 
@@ -143,3 +149,4 @@ plot(min.cl:max.cl, yesConsol, type = "b",
      \nConsolidated clusters",
      xlab="Number of clusters", ylab="C-H Index", cex.lab=0.8)
 plotAddSubtitle(subtitle3)
+
