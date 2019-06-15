@@ -125,7 +125,11 @@ numeric <- data.2017[,-1]
 ### Univariate outliers discussion
 for( i in 1:ncol(numeric)) {
   title <- paste("Histogram of", colnames(numeric)[i])
-  hist(numeric[,i], main=title)
+  #hist(numeric[,i], main=title)
+  b <- boxplot(numeric[,i], main=title, horizontal = T)
+  for(j in b$out) {
+    print(rownames(numeric[which(numeric[,i] == j),]))
+  }
   #readline(prompt="Press [enter] to continue")
 }
 
@@ -133,15 +137,20 @@ for( i in 1:ncol(numeric)) {
 
 ## Mahalanobis distance outlier detection
 mout.dist <- Moutlier(numeric, plot = F)
-plot(rd ~ md, mout.dist)
+plot(rd ~ md, mout.dist, main="Multivariate outlier detection with Mahalanobis distance",
+     ylab="Robustified Mahalanobis distace", xlab="Mahalnobis distance")
 abline(h=mout.dist$cutoff, v=mout.dist$cutoff, col="red")
 outliers.mout <- numeric[which(mout.dist$md > mout.dist$cutoff & mout.dist$rd  > mout.dist$cutoff),]
+text(mout.dist$rd[rownames(outliers.mout)] ~ mout.dist$md[rownames(outliers.mout)],
+     labels=rownames(outliers.mout), cex=0.9, pos=3)
 
 ## Density factor outlier detection
-out.scores <- lofactor(numeric, k=5)
-plot(out.scores)
+out.scores <- data.frame(lof=lofactor(numeric, k=5))
+rownames(out.scores) <- rownames(numeric)
+plot(out.scores[,1], main="Multivariate outlier detection with Local Outlier Factor",
+     ylab="Local Outlier Factor", xlab="Index")
 abline(h=1.4, col="red")
-outliers.lof <- numeric[which(out.scores > 1.4),]
+
 
 ########## WRITE OUTPUT DATAFRAMES TO CSV ##########
 write.csv(data.2017, file = "training.csv")
