@@ -16,25 +16,28 @@ colors <- sample(c('#000000', '#FF0000', '#808000', '#00FF00', '#008000',
 
 ####################  Load dataset #########################
 data <- read.csv("training.csv", header = TRUE, dec=".", check.names = TRUE, row.names = 1)
+sup <- read.csv("test.csv", header = TRUE, dec=".", check.names = TRUE, row.names = 1)
 
 # set variables as factors
 as.factor(data$Region)
 
 
 ################### PCA ##########################
+df.pca <- rbind(data, sup)
 
-
-pca.Happiness = PCA(data,scale.unit = TRUE,quali.sup = 1,graph=FALSE)
+pca.Happiness = PCA(df.pca, scale.unit = TRUE, ind.sup=(nrow(data)+1):nrow(df.pca), quali.sup = 1,graph=FALSE)
 plot(pca.Happiness, cex=0.8, choix="var")
 
 # Let's see how the groups are distributed in the factorial space
 plotInd <- fviz_pca_ind(pca.Happiness,
-                        label = "none", # hide individual labels
+                        label = "all", # hide individual labels
                         habillage = data$Region, # color by region
                         palette = colors,
                         invisible = "ind.sup",
                         addEllipses = FALSE # Concentration ellipses
 )
+plotInd <- fviz_add(plotInd, pca.Happiness$ind.sup$coord[,1:2],
+         addlabel=T, color=alpha("#E05C00",0.4), shape=20, pointsize=4)
 ggpubr::ggpar(plotInd ,
               legend = c(0.2, 0.3)
               

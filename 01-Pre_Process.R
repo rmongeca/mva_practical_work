@@ -76,9 +76,6 @@ rownames(data.2017) <- data.2017$Country.name
 rownames(data.2018) <- data.2018$Country.name
 data.2017 <- data.2017[,-c(1,3)]
 data.2018 <- data.2018[,-c(1,3)]
-## Remove data points with missing values in 2018 data
-ind.na.2018 <- apply(data.2018, 1, function(x) 100*(sum(is.na(x)))/ncol(table))
-data.2018 <- data.2018[which(ind.na.2018 < 0.1),]
 
 ##########  ADD GROWTH VARIABLES FOR PREVIOUS 2016, 2015 YEARS  ##########
 ## See country differences between years
@@ -106,6 +103,10 @@ data.2017[,"Growth2"] <- merge(data.2017, growth15, by="row.names", all.x=TRUE)[
 
 rm(growth15, growth16, growth16.2, growth17)
 
+## Remove data points with missing values in 2018 data
+ind.na.2018 <- apply(data.2018, 1, function(x) 100*(sum(is.na(x)))/ncol(table))
+data.2018 <- data.2018[which(ind.na.2018 < 0.1),]
+
 ########## CORRELATION BEFORE IMPUTATION ########## 
 
 # we use 2:15 to avoid region, growth 2015 and growth 2016 in cor.
@@ -113,7 +114,7 @@ corrplot(cor(data.2017[,2:15] ,use="pairwise.complete.obs"),tl.cex=0.5)
 
 ########## IMPUTATION OF MISSING VAUES ########## 
   
-m = mice(data.2017, m = 5, print = FALSE, seed = 1)
+m = mice(data.2017, m = 5, print = FALSE)
 names <- rownames(data.2017)
 data.2017 = complete(m)
 rownames(data.2017) <- names
@@ -124,7 +125,7 @@ numeric <- data.2017[,-1]
 
 ### Univariate outliers discussion
 for( i in 1:ncol(numeric)) {
-  title <- paste("Histogram of", colnames(numeric)[i])
+  title <- paste("Boxplot of", colnames(numeric)[i])
   #hist(numeric[,i], main=title)
   b <- boxplot(numeric[,i], main=title, horizontal = T)
   for(j in b$out) {
