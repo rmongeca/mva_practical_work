@@ -59,8 +59,8 @@ summary(table)
 ## Check variable missings
 (var.na <- apply(table, 2, function(x) 100*(sum(is.na(x))/nrow(table))))
 ## Drop variables lots of missing
-dropped.columns <- colnames(table)[c(14:15, 18, 21:27)]
-table <- table[,- c(14:15, 18, 21:27)]
+dropped.columns <- colnames(table)[c(14:17, 18, 21:27)]
+table <- table[,- c(14:17, 18, 21:27)]
 ## Check individuals missings
 (ind.na <- apply(table, 1, function(x) 100*(sum(is.na(x)))/ncol(table)))
 ## Not many missings per individual
@@ -87,22 +87,22 @@ setdiff(unique(rownames(data.2016)), unique(rownames(data.2017)))
 setdiff(unique(rownames(data.2017)), unique(rownames(data.2018)))
 
 ## Add growth variables 2017:
-data.2018$Growth.2017 <- NA
+data.2018$Growth1 <- NA
 growth17 <- as.data.frame(data.2018$Happiness.score - data.2017[rownames(data.2018),"Happiness.score"], row.names = rownames(data.2018))
-data.2018[,"Growth.2017"] <- merge(data.2018, growth17, by="row.names", all.x=TRUE)[,18]
+data.2018[,"Growth1"] <- merge(data.2018, growth17, by="row.names", all.x=TRUE)[,16]
 
 ## Add growth variables 2016:
-data.2017$Growth.2016 <- NA
-data.2018$Growth.2016 <- NA
+data.2017$Growth1 <- NA
+data.2018$Growth2 <- NA
 growth16 <- as.data.frame(data.2017$Happiness.score - data.2016[rownames(data.2017),], row.names = rownames(data.2017))
 growth16.2 <- as.data.frame(data.2017[rownames(data.2018),"Happiness.score"] - data.2016[rownames(data.2018),], row.names = rownames(data.2018))
-data.2017[,"Growth.2016"] <- merge(data.2017, growth16, by="row.names", all.x=TRUE)[,18]
-data.2018[,"Growth.2016"] <- merge(data.2018, growth16.2, by="row.names", all.x=TRUE)[,19]
+data.2017[,"Growth1"] <- merge(data.2017, growth16, by="row.names", all.x=TRUE)[,16]
+data.2018[,"Growth2"] <- merge(data.2018, growth16.2, by="row.names", all.x=TRUE)[,17]
 
 ## Add growth variables 2015:
-data.2017$Growth.2015 <- NA
+data.2017$Growth2 <- NA
 growth15 <- as.data.frame(data.2016 - data.2015[rownames(data.2016),], row.names = rownames(data.2016))
-data.2017[,"Growth.2015"] <- merge(data.2017, growth15, by="row.names", all.x=TRUE)[,19]
+data.2017[,"Growth2"] <- merge(data.2017, growth15, by="row.names", all.x=TRUE)[,17]
 
 rm(growth15, growth16, growth16.2, growth17)
 
@@ -146,10 +146,13 @@ text(mout.dist$rd[rownames(outliers.mout)] ~ mout.dist$md[rownames(outliers.mout
 
 ## Density factor outlier detection
 out.scores <- data.frame(lof=lofactor(numeric, k=5))
+out.scores$index <- rownames(out.scores)
 rownames(out.scores) <- rownames(numeric)
-plot(out.scores[,1], main="Multivariate outlier detection with Local Outlier Factor",
+plot(lof ~ index, out.scores, main="Multivariate outlier detection with Local Outlier Factor",
      ylab="Local Outlier Factor", xlab="Index")
 abline(h=1.4, col="red")
+outliers.lof <- subset(out.scores, lof > 1.4, row.names=rownames(out.scores))
+text(lof~index, outliers.lof, labels=rownames(outliers.lof), pos=1)
 
 
 ########## WRITE OUTPUT DATAFRAMES TO CSV ##########
