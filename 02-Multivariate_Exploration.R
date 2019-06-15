@@ -46,7 +46,9 @@ ggpubr::ggpar(plotInd ,
 )
 
 # using elbow and raiser rule we select 5 components.
-plot(pca.Happiness$eig[,1],type="b",col='blue',ylab="Eigenvalue",xlab="Component Number")
+plot(pca.Happiness$eig[,1],type="b",col='blue',ylab="Eigenvalue",xlab="Component Number",
+     main="Principal Component's eigenvalues")
+text(pca.Happiness$eig[,1], label=round(pca.Happiness$eig[,1],digits = 2), col="blue", pos=3)
 abline(h=1,lty=2,col="red")
 
 ################## Clustering  ####################
