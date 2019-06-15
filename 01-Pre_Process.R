@@ -4,6 +4,7 @@ set.seed(42)
 
 library(DMwR)
 library(chemometrics)
+library(corrplot) 
 library(mice) 
 library(missForest) 
 
@@ -64,6 +65,9 @@ data.2017[,"Growth.2015"] <- merge(data.2017, growth15, by="row.names", all.x=TR
 
 rm(growth15, growth16)
 
+########## CORRELATION BEFORE IMPUTATION ########## 
+
+corrplot(cor(data.2017[,2:15] ,use="pairwise.complete.obs"),tl.cex=0.5)
 
 ########## IMPUTATION OF MISSING VAUES ########## 
   
@@ -100,4 +104,7 @@ outliers.lof <- numeric[which(out.scores > 1.4),]
 ########## WRITE OUTPUT DATAFRAMES TO CSV ##########
 write.csv(data.2017, file = "training.csv")
 write.csv(data.2018, file = "test.csv")
+
+
+
 
