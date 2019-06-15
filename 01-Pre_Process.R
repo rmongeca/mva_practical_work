@@ -67,6 +67,7 @@ rm(growth15, growth16)
 
 ########## CORRELATION BEFORE IMPUTATION ########## 
 
+# we use 2:15 to avoid region, growth 2015 and growth 2016 in cor.
 corrplot(cor(data.2017[,2:15] ,use="pairwise.complete.obs"),tl.cex=0.5)
 
 ########## IMPUTATION OF MISSING VAUES ########## 
