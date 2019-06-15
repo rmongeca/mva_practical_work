@@ -26,7 +26,7 @@ as.factor(data$Region)
 df.pca <- rbind(data, sup)
 
 pca.Happiness = PCA(df.pca, scale.unit = TRUE, ind.sup=(nrow(data)+1):nrow(df.pca), quali.sup = 1,graph=FALSE)
-plot(pca.Happiness, cex=0.8, choix="var")
+fviz_pca_var(pca.Happiness,  col.var="contrib",gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"), repel=TRUE)
 
 # Let's see how the groups are distributed in the factorial space
 plotInd <- fviz_pca_ind(pca.Happiness,
@@ -34,12 +34,14 @@ plotInd <- fviz_pca_ind(pca.Happiness,
                         habillage = data$Region, # color by region
                         palette = colors,
                         invisible = "ind.sup",
-                        addEllipses = FALSE # Concentration ellipses
+                        addEllipses = FALSE, # Concentration ellipses
+                        show.legend = FALSE
 )
 plotInd <- fviz_add(plotInd, pca.Happiness$ind.sup$coord[,1:2],
          addlabel=T, color=alpha("#E05C00",0.4), shape=20, pointsize=4)
 ggpubr::ggpar(plotInd ,
-              legend = c(0.2, 0.3)
+              legend = c(0.1, 0.2),
+              show.legend = FALSE
               
 )
 
