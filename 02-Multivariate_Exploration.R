@@ -5,6 +5,12 @@
 ##
 
 library (cclust)
+library(factoextra)
+library(FactoMineR)
+
+# Color palette
+colors <- sample(c('#000000', '#FF0000', '#808000', '#00FF00', '#008000', 
+                   '#00FFFF', '#0000FF', '#FF00FF', '#800080', '#ffa500'))
 
 
 ####################  Load dataset #########################
@@ -16,6 +22,26 @@ as.factor(data$Region)
 
 ################### PCA ##########################
 
+
+pca.Happiness = PCA(data,scale.unit = TRUE,quali.sup = 1,graph=FALSE)
+plot(pca.Happiness, cex=0.8, choix="var")
+
+# Let's see how the groups are distributed in the factorial space
+plotInd <- fviz_pca_ind(pca.Happiness,
+                        label = "none", # hide individual labels
+                        habillage = data$Region, # color by region
+                        palette = colors,
+                        invisible = "ind.sup",
+                        addEllipses = FALSE # Concentration ellipses
+)
+ggpubr::ggpar(plotInd ,
+              legend = c(0.2, 0.3)
+              
+)
+
+# using elbow and raiser rule we select 5 components.
+plot(pca.Happiness$eig[,1],type="b",col='blue',ylab="Eigenvalue",xlab="Component Number")
+abline(h=1,lty=2,col="red")
 
 ################## Clustering  ####################
 
