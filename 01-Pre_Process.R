@@ -16,6 +16,7 @@ data.2015 <- data.frame(data.2015[,2], row.names = data.2015$Country.name)
 data.2016 <- data.frame(data.2016[,2], row.names = data.2016$Country.name)
 ## Drop unused years
 table <- table[which(table$Year %in% 2017:2018),]
+## Reset rownames index
 rownames(table) <- NULL
 
 
@@ -66,7 +67,7 @@ rm(growth15, growth16)
 
 ########## IMPUTATION OF MISSING VAUES ########## 
   
-m = mice(data.2017, m = 1, print = FALSE, seed = 1)
+m = mice(data.2017, m = 5, print = FALSE, seed = 1)
 names <- rownames(data.2017)
 data.2017 = complete(m)
 rownames(data.2017) <- names
@@ -79,7 +80,7 @@ numeric <- data.2017[,-1]
 for( i in 1:ncol(numeric)) {
   title <- paste("Histogram of", colnames(numeric)[i])
   hist(numeric[,i], main=title)
-  readline(prompt="Press [enter] to continue")
+  #readline(prompt="Press [enter] to continue")
 }
 
 ### Multivariate outliers discussion
@@ -95,4 +96,8 @@ out.scores <- lofactor(numeric, k=5)
 plot(out.scores)
 abline(h=1.4, col="red")
 outliers.lof <- numeric[which(out.scores > 1.4),]
+
+########## WRITE OUTPUT DATAFRAMES TO CSV ##########
+write.csv(data.2017, file = "training.csv")
+write.csv(data.2018, file = "test.csv")
 
