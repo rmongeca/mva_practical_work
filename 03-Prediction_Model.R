@@ -40,10 +40,21 @@ mean((pred.tree-happy.test)^2) #0.28
 
 
 ####################  Model: Random Forest #########################
-# model
-model.rf <- randomForest(Happiness.score ~ ., data=train[,-c(12,13)], ntree=100, proximity=FALSE)
-
+# random forest model for regression
+model.rf <- randomForest(Happiness.score ~ ., data=train, mtry=5, importance=TRUE )
+model.rf
 # and predict
-pred.rf <- predict (model.rf, test)
+pred.rf <- predict (model.rf, newdata=test)
+plot(pred.rf, happy.test)
+abline(0,1)
+mean((pred.rf - happy.test)^2) # 0.1425542
 
-(ct <- table(Truth=spam3[-learn,]$type, Pred=pred.rf1))
+
+# try bagging model
+bag.rf <- randomForest(Happiness.score ~ ., data=train, mtry=14, importance=TRUE )
+bag.rf
+# and predict
+pred.bag <- predict (bag.rf, newdata=test)
+plot(pred.bag, happy.test)
+abline(0,1)
+mean((pred.bag - happy.test)^2) # 0.1371605

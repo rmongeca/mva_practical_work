@@ -165,4 +165,21 @@ table(c1)
 fviz_dend(hward, cex = 0.5, k = cl, ggtheme = theme_minimal(),repel=T) 
 
 
+# visualize clusters using the first two factorial coordinates
+plotInd <- fviz_pca_ind( pca.Happiness, 
+             label="all",
+             habillage =  as.factor(c1), #color by cluster
+             addEllipses=FALSE,
+             invisible = "ind.sup",
+             ggtheme = theme_minimal(),
+             show.legend = FALSE,
+             repel =T
+)
+
+ggpubr::ggpar(plotInd ,
+              legend = c(0.1, 0.2),
+              show.legend = FALSE
+              
+)
+
 
