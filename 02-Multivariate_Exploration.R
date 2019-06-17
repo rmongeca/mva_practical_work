@@ -46,13 +46,13 @@ ggpubr::ggpar(plotInd ,
 )
 
 # using elbow and raiser rule we select 5 components.
-plot(pca.Happiness$eig[,1],type="b",col='blue',ylab="Eigenvalue",xlab="Component Number")
+plot(pca.Happiness$eig[,1],type="b",col='blue',ylab="Eigenvalue",xlab="Component Number", main= "Cumulative Variance Explained of Eigen Values")
 abline(h=1,lty=2,col="red")
+text(pca.Happiness$eig[,1], labels = round(pca.Happiness$eig[,3], digits = 2), col = 4, pos = 1)
 
 ################## Clustering  ####################
 
-# # first, perform a hierarchical clustering
-
+## first, perform a hierarchical clustering
 # significant dimensions
 signi <- 5
 # if we perform on clustering on pca, get factorial coordinates of individuals
@@ -61,11 +61,13 @@ df.pca <- pca.Happiness$ind$coord[, 1:signi]
 # hierarchical clustering on factorial coordinates from PCA
 # calculate a distance matrix between individuals which uses the squared
 distances = dist(df.pca, method = "euclidean")
-# # then we apply hclust with method="ward"
+## then we apply hclust with method="ward"
 hward = hclust(distances, method="ward.D2")
 
 # plot dendrograms
 plot(hward)
+
+########## --------- Declare functions --------- ##########
 
 clusterData <- function(data, distance.method="euclidean",
                         cl.method="ward.D2",
@@ -128,25 +130,39 @@ plotAddSubtitle <- function(subtitle) {
   par(adj = 0.5)  # Reset alignment
 }
 
+########## ------- End Declare functions -------- ##########
+
 method <- "Ward"
 subtitle <- paste("Aggregation method:", method)
 
+## Plot calinski without consolidation.
 min.cl <- 2
 max.cl <- 15
 noConsol <- clusterData(df.pca, min.cl = min.cl, max.cl = max.cl, 
                         consolidation = FALSE)
 subtitle2 <- paste(subtitle, "Consolidation: No", sep = ", ")
 plot(min.cl:max.cl, noConsol, type = "b",
-     main="Calinski-Harabassz Index vs number of clusters",
+     main="Calinski-Harabasz Index vs number of clusters",
      xlab="Number of clusters", ylab="C-H Index", cex.lab=0.8)
 plotAddSubtitle(subtitle2)
-
+## Plot calinski with consolidation.
 yesConsol <- clusterData(df.pca, min.cl = 2, max.cl = 15, 
                          consolidation = TRUE)
 subtitle3 <- paste(subtitle, "Consolidation: Yes", sep = ", ")
 plot(min.cl:max.cl, yesConsol, type = "b", 
-     main="Calinski-Harabassz Index vs number of clusters
+     main="Calinski-Harabasz Index vs number of clusters
      \nConsolidated clusters",
      xlab="Number of clusters", ylab="C-H Index", cex.lab=0.8)
 plotAddSubtitle(subtitle3)
+
+# Chosen number of clusters
+cl <- 4
+# cut tree and see the size of clusters
+c1 <- cutree(hward, cl)
+table(c1)
+
+# Plot dendrogram with color
+fviz_dend(hward, cex = 0.5, k = cl, ggtheme = theme_minimal(),repel=T) 
+
+
 
