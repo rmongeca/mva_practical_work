@@ -158,8 +158,19 @@ plotAddSubtitle(subtitle3)
 # Chosen number of clusters
 cl <- 4
 # cut tree and see the size of clusters
-c1 <- cutree(hward, cl)
-table(c1)
+clust <- cutree(hward, cl)
+# Calculate centroids of clusters
+centroid <- df.pca[1:cl,]
+row.names(centroid) <- 1:cl
+for (i in 1:cl) {
+  for (j in 1:ncol(centroid)) {
+    centroid[i,j] <- mean(df.pca[which(clust == i),j])
+  }
+}
+# Perform consolidation
+cl.kmeans <- kmeans(df.pca, centroid)
+clust <- cl.kmeans$cluster
+table(clust)
 
 # Plot dendrogram with color
 fviz_dend(hward, cex = 0.5, k = cl, ggtheme = theme_minimal(),repel=T) 
@@ -168,7 +179,7 @@ fviz_dend(hward, cex = 0.5, k = cl, ggtheme = theme_minimal(),repel=T)
 # visualize clusters using the first two factorial coordinates
 plotInd <- fviz_pca_ind( pca.Happiness, 
              label="all",
-             habillage =  as.factor(c1), #color by cluster
+             habillage =  as.factor(clust), #color by cluster
              addEllipses=FALSE,
              invisible = "ind.sup",
              ggtheme = theme_minimal(),
@@ -182,4 +193,7 @@ ggpubr::ggpar(plotInd ,
               
 )
 
-
+######### Profiling ######### 
+df.prof <- data
+df.prof$cl <- as.factor(clust)
+catdes(df.prof, num.var = ncol(df.prof))
