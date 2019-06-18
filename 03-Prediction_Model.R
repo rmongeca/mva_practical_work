@@ -5,7 +5,7 @@
 ##
 
 set.seed (42)
-
+rm(list=ls())
 library(tree)
 library(randomForest)
 library(rattle)
@@ -80,11 +80,13 @@ mean((pred.tree.prun-happy.test)^2) #0.34
 
 ####################  Model: Random Forest #########################
 # random forest model for regression
-model.rf <- randomForest(Happiness.score ~ ., data=train, mtry=5, importance=TRUE )
+model.rf <- randomForest(Happiness.score ~ ., data=train, mtry=ncol(train)/3, importance=TRUE )
 model.rf
 # and predict
 pred.rf <- predict (model.rf, newdata=test)
-plot(pred.rf, happy.test)
+plot(pred.rf, happy.test, col="#900c3f", pch=1,
+     main="Test set prediction vs real value",
+     xlab="Prediction", ylab="Real value", cex=1.2)
 abline(0,1)
 mean((pred.rf - happy.test)^2) # 0.1425542
 
@@ -95,8 +97,13 @@ bag.rf <- randomForest(Happiness.score ~ ., data=train, mtry=14, importance=TRUE
 bag.rf
 # and predict
 pred.bag <- predict (bag.rf, newdata=test)
-plot(pred.bag, happy.test)
-abline(0,1)
+#plot(pred.bag, happy.test, col="#900c3f", pch=1,
+#     main="Test set prediction vs real value",
+#     xlab="Prediction", ylab="Real value")
+#abline(0,1)
+points(pred.bag, happy.test, col="#4422ee", pch=19, cex=1)
+legend("bottomleft", pch=c(1,19), inset=c(0,0.7), horiz=F, bty="n", pt.cex=1.2,
+       legend = c("Random forest predictions", "Bagged decision trees"), col=c("#900c3f", "#4422ee"))
 mean((pred.bag - happy.test)^2) # 0.1371605
 
 
@@ -126,7 +133,10 @@ for (nt in ntrees)
 
 # print results
 rf.results
-plot(rf.results, type='b')
+plot(rf.results, type='b', col="#900c3f",
+     main="Random forest error against forest size",
+     xlab="Forest size (num of decision trees)", ylab="MMSE")
+text(rf.results, label=round(rf.results[,2], digits=2), col="#900c3f", pos=3)
 
 # get lowest MSE error
 lowest.MSE.error <- as.integer(which.min(rf.results[,"MMSE"]))
@@ -137,12 +147,14 @@ model.rf.fin <- randomForest(Happiness.score ~ ., data=train, ntree=ntrees.best,
 
 # final test error
 pred.rf.fin <- predict (model.rf.fin, newdata=test)
-plot(pred.rf.fin, happy.test)
+plot(pred.rf.fin, happy.test, col="#900c3f", pch=1,
+     main="Test set prediction vs real value",
+     xlab="Prediction", ylab="Real value")
 abline(0,1)
-mean((pred.rf - happy.test)^2)
+mean((pred.rf.fin - happy.test)^2)
 
 
 # importance of variables
-importance(model.rf.fin)
-varImpPlot(model.rf.fin)
+randomForest::importance(model.rf.fin)
+varImpPlot(model.rf.fin, main="Importance of variables in the random forest")
 
