@@ -31,18 +31,39 @@ plot (model.tree)
 text (model.tree,pretty=0)
 
 # in the contect of a regression tree, the deviance is the sum of squared errors for the tree
+## Function to prune tree
+pruneTree <- function(tree.rpart) {
+  rpart.cptable <- as.data.frame(tree.rpart$cptable)
+  ind <- which.min(rpart.cptable$xerror)
+  xerr <- rpart.cptable$xerror[ind]
+  xstd <- rpart.cptable$xstd[ind]
+  i = 1
+  while (rpart.cptable$xerror[i] > xerr+xstd) i = i+1
+  # prune the tree with the choosen CP
+  tree.prune <- prune(tree.rpart, cp = rpart.cptable[i,1])
+  fancyRpartPlot(tree.prune, palettes = "Purples", sub = "  ")
+  return(tree.prune)
+}
 
-# use cv.tree() to check whether pruning the tree will improve performance
-cv.res <- cv.tree(model.tree)
-plot(cv.res$size, cv.res$dev, type='b')
+plot(model.tree$cptable[,4] ~ rownames(model.tree$cptable), type='b')
+tree.prune <- pruneTree(model.tree)
 
 # predict with the unpruned tre model
 pred.tree <- predict(model.tree, newdata=test)
+pred.tree.prun <- predict(tree.prune, newdata = test)
 happy.test <- test[,"Happiness.score"]
 
-plot(pred.tree, happy.test)
+plot(pred.tree, happy.test, col="red", pch=1,
+     main="Test set prediction vs real value",
+     xlab="Prediction", ylab="Real value")
+points(pred.tree.prun, happy.test, col="blue", pch=2)
 abline(0,1)
-mean((pred.tree-happy.test)^2) #0.28
+legend("bottomleft", pch=1:2, inset=c(0,0.7), horiz=F, bty="n",
+       legend = c("Maximal Tree predictions", "Pruned tree predictions"), col=c("red", "blue"))
+
+## Error of predictions
+mean((pred.tree-happy.test)^2) #0.27
+mean((pred.tree.prun-happy.test)^2) #0.34
 
 # plot
 fancyRpartPlot(model.tree, palettes = "Purples", sub = "  ")
