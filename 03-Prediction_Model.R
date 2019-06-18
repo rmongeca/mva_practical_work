@@ -24,7 +24,8 @@ as.factor(test$Region)
 
 ####################  Model: Decision Tree #########################
 
-model.tree <- rpart(Happiness.score ~ ., data=train) # removing sd and cv happiness
+model.tree <- rpart(Happiness.score ~ ., data=train,
+                    control=rpart.control(cp=0.001, xval=10)) # removing sd and cv happiness
 summary(model.tree)
 
 plot (model.tree)
@@ -45,8 +46,19 @@ pruneTree <- function(tree.rpart) {
   return(tree.prune)
 }
 
-plot(model.tree$cptable[,4] ~ rownames(model.tree$cptable), type='b')
+plot(model.tree$cptable[,4] ~ rownames(model.tree$cptable), type='b', col="purple",
+     main="Subtree validation error against tree size",
+     xlab="Tree size (num of leaves)", ylab="Tree validation error")
+# Point out selected point
+ind <- which.min(model.tree$cptable[,4])
+xerr <- model.tree$cptable[ind,4]
+xstd <- model.tree$cptable[ind,5]
+i = 1
+while (model.tree$cptable[i,4] > xerr+xstd) i = i+1
+points(model.tree$cptable[i,4] ~ i, pch=20, cex=2, col="purple")
 tree.prune <- pruneTree(model.tree)
+# plot
+fancyRpartPlot(model.tree, palettes = "Purples", sub = "  ")
 
 # predict with the unpruned tre model
 pred.tree <- predict(model.tree, newdata=test)
@@ -64,9 +76,6 @@ legend("bottomleft", pch=1:2, inset=c(0,0.7), horiz=F, bty="n",
 ## Error of predictions
 mean((pred.tree-happy.test)^2) #0.27
 mean((pred.tree.prun-happy.test)^2) #0.34
-
-# plot
-fancyRpartPlot(model.tree, palettes = "Purples", sub = "  ")
 
 
 ####################  Model: Random Forest #########################
